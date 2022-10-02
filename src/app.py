@@ -25,7 +25,7 @@ app.add_middleware(
 @app.get('/feed')
 def feed():
     app.logger.info("Serving camera feed...")
-    return StreamingResponse(generate_mjpg(app.camera_controller), media_type="multipart/x-mixed-replace; boundary=frame")
+    return StreamingResponse(generate_mjpg(app.camera_controller),200, media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 

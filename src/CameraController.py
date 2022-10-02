@@ -2,7 +2,6 @@ import threading
 import cv2
 import imutils
 import time
-import logging
 import io
 import json
 import numpy as np
@@ -31,7 +30,7 @@ class CameraController(threading.Thread):
         self.height = self.config["img_height"]
 
 # Image resolution used for motion detection, same aspect ratio as desired image
-        self.md_width = 720
+        self.md_width = self.config["md_width"]
         self.md_height = self.md_width * self.height // self.width
 
 # TODO: this parameter should only be required in case of photo-mode
