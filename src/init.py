@@ -75,10 +75,7 @@ def create_app():
     return app
 
 def create_error_app(e):
-    """
-    Create flask app about an error occurred in the main app
-    :return: Flask app object
-    """
+    # Create FastAPI app about an error occurred in the main app
     app = FastAPI()
 
     @app.route('/')
