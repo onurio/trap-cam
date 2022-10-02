@@ -1,0 +1,8 @@
+services:
+  trap-cam:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trap-cam
+    ports:
+      - "8080:80"
