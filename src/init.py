@@ -8,9 +8,8 @@ from logging.handlers import RotatingFileHandler
 
 from fastapi import FastAPI
 from .CameraController import CameraController
-# from naturewatch_camera_server.ChangeDetector import ChangeDetector
-# from naturewatch_camera_server.FileSaver import FileSaver
-# from flask import Flask
+from .ChangeDetector import ChangeDetector
+from .FileSaver import FileSaver
 # from naturewatch_camera_server.api import api
 # from naturewatch_camera_server.data import data
 # from naturewatch_camera_server.static_page import static_page
@@ -68,8 +67,8 @@ def create_app():
     # Instantiate classes
     app.camera_controller = CameraController(app.logger, app.user_config)
     app.logger.debug("Instantiating classes ...")
-    # app.change_detector = ChangeDetector(app.camera_controller, app.user_config, app.logger)
-    # app.file_saver = FileSaver(app.user_config, app.logger)
+    app.change_detector = ChangeDetector(app.camera_controller, app.user_config, app.logger)
+    app.file_saver = FileSaver(app.user_config, app.logger)
 
     app.logger.debug("Initialisation finished")
     return app
