@@ -212,9 +212,7 @@ class ChangeDetector(Thread):
                             while( int(time.time() - start_time) < capture_duration ):
                                 ret, frame = cap.read()
                                 if ret==True:
-                                    # frame = cv2.flip(frame,0)
                                     out.write(frame)
-                                    # cv2.imshow('frame',frame)
                                 else:
                                     break
 
