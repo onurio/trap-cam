@@ -14,6 +14,7 @@ app = create_app();
 
 try:
     app.camera_controller.start()
+    app.change_detector.start()
 except Exception as e:
     app = create_error_app(e)
 
@@ -40,7 +41,7 @@ def generate_mjpg(camera_controller):
         latest_frame = camera_controller.get_image_binary()
         response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
         yield(response)
-        time.sleep(0.2)
+        time.sleep(0.1)
 
 @app.get('/frame')
 def frame():
@@ -109,7 +110,7 @@ def settings_handler():
         app.change_detector.timelapse = settings["timelapse"]["interval"]
     
     new_settings = construct_settings_object(app.camera_controller, app.change_detector)
-    return Response(json.dumps(new_settings), mimetype='application/json')
+    return Response(json.dumps(new_settings), media_type='application/json')
 
 
 def construct_settings_object(camera_controller, change_detector):
@@ -137,8 +138,8 @@ def construct_settings_object(camera_controller, change_detector):
         },
         "sensitivity": sensitivity,
         "timelapse": {
-            "active": app.change_detector.timelapse_active,
-            "interval": app.change_detector.timelapse,
+            "active": change_detector.timelapse_active,
+            "interval": change_detector.timelapse,
         }
     }
     return settings
@@ -154,10 +155,10 @@ def get_session():
         "mode": app.change_detector.mode,
         "time_started": app.change_detector.session_start_time
     }
-    return Response(json.dumps(session_status), mimetype='application/json')
+    return Response(json.dumps(session_status), media_type='application/json')
 
 
-@app.post('/session/start/<session_type>')
+@app.post('/session/start')
 def start_session_handler(session_type):
     """
     Start session of type photo or video
@@ -174,7 +175,7 @@ def start_session_handler(session_type):
         "mode": app.change_detector.mode,
         "time_started": app.change_detector.session_start_time
     }
-    return Response(json.dumps(session_status), mimetype='application/json')
+    return Response(json.dumps(session_status), media_type='application/json')
 
 
 @app.post('/session/stop')

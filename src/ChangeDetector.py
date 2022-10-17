@@ -1,3 +1,5 @@
+from asyncio.log import logger
+import os
 import cv2
 import numpy as np
 from threading import Thread
@@ -193,8 +195,29 @@ class ChangeDetector(Thread):
                         self.file_saver.save_thumb(img, timestamp, self.mode)
                         self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                         self.logger.info("ChangeDetector: video capture completed")
-                        with self.camera_controller.get_video_stream().lock:
-                            self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                        if self.camera_controller.get_video_stream():
+                            with self.camera_controller.get_video_stream():
+                                self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                        else:
+                            capture_duration = 10
+
+                            cap = cv2.VideoCapture(0)
+                            width= int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                            height= int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                            filename = timestamp + ".mp4"
+                            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                            out = cv2.VideoWriter(os.path.join(self.config["videos_path"], filename),fourcc, 20.0, (width, height))
+
+                            start_time = time.time()
+                            while( int(time.time() - start_time) < capture_duration ):
+                                ret, frame = cap.read()
+                                if ret==True:
+                                    # frame = cv2.flip(frame,0)
+                                    out.write(frame)
+                                    # cv2.imshow('frame',frame)
+                                else:
+                                    break
+
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug("ChangeDetector: video timer reset")
                     else:

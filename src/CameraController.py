@@ -216,7 +216,7 @@ class CameraController(threading.Thread):
         self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {}'.format(
             self.camera.resolution, self.camera.framerate))
 
-# TODO: use correct port fitting the requested resolution
+        # TODO: use correct port fitting the requested resolution
         # Set up low res stream for motion detection
         self.picamera_md_output = picamera.array.PiRGBArray(self.camera, size=(self.md_width, self.md_height))
         self.picamera_md_stream = self.camera.capture_continuous(self.picamera_md_output, format="bgr",
