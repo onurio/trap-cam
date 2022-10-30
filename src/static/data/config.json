@@ -1,4 +1,6 @@
 {
+	"ngrok_token": "2C5SAXF8ngnvNMUIjhUtbExoAO3_75LRgYSFLQf4FrybD7Qe6",
+	"use_ngrok": true,
 	"cv_width": 320,
 	"cv_height": 180,
 	"img_width": 1920,
@@ -30,7 +32,7 @@
 	"video_duration_before_motion": 5,
 	"video_duration_after_motion": 10,
 	"default_timelapse": 300,
-	"webhook_url": "http://localhost:3000/status/update",
+	"webhook_url": "http://169.51.205.122:30945/status/update",
 	"notification": {
 		"enabled": true,
 		"id": 1

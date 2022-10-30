@@ -54,7 +54,7 @@ def create_app():
     # Find photos and videos paths
     app.user_config["photos_path"] = os.path.join(module_path, app.user_config["photos_path"])
     app.logger.info("Photos path: " + app.user_config["photos_path"])
-    if os.path.isdir(app.user_config["photos_path"]) is False:
+    if os.path.isdir(app .user_config["photos_path"]) is False:
         os.mkdir(app.user_config["photos_path"])
         app.logger.warning("Photos directory does not exist, creating path")
     app.user_config["videos_path"] = os.path.join(module_path, app.user_config["videos_path"])
@@ -62,6 +62,8 @@ def create_app():
         os.mkdir(app.user_config["videos_path"])
         app.logger.warning("Videos directory does not exist, creating path")
 
+
+    
     # Instantiate classes
     app.notifier = Notifier(app.user_config, app.logger)
     app.camera_controller = CameraController(app.logger, app.user_config)
@@ -70,6 +72,25 @@ def create_app():
     app.file_saver = FileSaver(app.user_config, app.logger)
 
     app.logger.debug("Initialisation finished")
+
+
+    if app.user_config["use_ngrok"] is True:
+        # pyngrok should only ever be installed or initialized in a dev environment when this flag is set
+        from pyngrok import ngrok
+
+        ngrok.set_auth_token(app.user_config["ngrok_token"])
+
+        # Get the dev server port (defaults to 8000 for Uvicorn, can be overridden with `--port`
+        # when starting the server
+        port = sys.argv[sys.argv.index("--port") + 1] if "--port" in sys.argv else 8000
+
+        # Open a ngrok tunnel to the dev server
+        public_url = ngrok.connect(port).public_url
+        app.logger.info("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
+
+        # Update any base URLs or webhooks to use the public ngrok URL
+        app.base_url = public_url
+        app.notifier.notify("IDLE",public_url)
     return app
 
 def create_error_app(e):
@@ -81,3 +102,4 @@ def create_error_app(e):
         return f"<html><body><h1>Unable to start TrapCam.</h1>An error occurred:<pre>{e}</pre></body></html>"
 
     return app
+

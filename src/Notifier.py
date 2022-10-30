@@ -19,13 +19,15 @@ class Notifier(Thread):
 
         self.config = config
 
-    def notify(self, status):
+    def notify(self, status, webhook_url=None):
         self.logger.info("Notifier: Sending notification: " + status)
         if self.config["notification"]["enabled"]:
             payload = {
                 "id": self.config["notification"]["id"],
                 "status": status,
             }
+            if(webhook_url is not None):
+                payload["url"] = webhook_url
             try:
                 # Send the notification - for now using http requests, but in the future this should be done with websockets
                 requests.post(self.config["webhook_url"], json=payload)
