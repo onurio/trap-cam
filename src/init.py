@@ -10,9 +10,7 @@ from fastapi import FastAPI
 from .CameraController import CameraController
 from .ChangeDetector import ChangeDetector
 from .FileSaver import FileSaver
-# from naturewatch_camera_server.api import api
-# from naturewatch_camera_server.data import data
-# from naturewatch_camera_server.static_page import static_page
+from .Notifier import Notifier
 
 
 def create_app():
@@ -65,9 +63,10 @@ def create_app():
         app.logger.warning("Videos directory does not exist, creating path")
 
     # Instantiate classes
+    app.notifier = Notifier(app.user_config, app.logger)
     app.camera_controller = CameraController(app.logger, app.user_config)
     app.logger.debug("Instantiating classes ...")
-    app.change_detector = ChangeDetector(app.camera_controller, app.user_config, app.logger)
+    app.change_detector = ChangeDetector(app.camera_controller, app.user_config, app.logger, app.notifier)
     app.file_saver = FileSaver(app.user_config, app.logger)
 
     app.logger.debug("Initialisation finished")

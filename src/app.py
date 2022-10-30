@@ -11,6 +11,11 @@ from src.init import create_app, create_error_app
 
 app = create_app();
 
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:8000",
+]
 
 try:
     app.camera_controller.start()
@@ -21,6 +26,7 @@ except Exception as e:
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

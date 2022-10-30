@@ -21,6 +21,4 @@ class FileSyncer(Thread):
         self.config = config
 
     def syncFile(self,file):
-        # Sync a file to the cloud storage    
-
-    
+        # Sync a file to the cloud storage

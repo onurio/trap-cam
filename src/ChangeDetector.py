@@ -1,5 +1,7 @@
 from asyncio.log import logger
+from concurrent.futures import thread
 import os
+import threading
 import cv2
 import numpy as np
 from threading import Thread
@@ -12,13 +14,14 @@ from .FileSaver import FileSaver
 
 class ChangeDetector(Thread):
 
-    def __init__(self, camera_controller, config, logger):
+    def __init__(self, camera_controller, config, logger, notifier):
         super(ChangeDetector, self).__init__()
         self.config = config
         self.daemon = True
         self.cancelled = False
 
         self.camera_controller = camera_controller
+        self.notifier = notifier
 
         self.logger = logger
 
@@ -122,6 +125,7 @@ class ChangeDetector(Thread):
             return False
         else:
             if self.get_fake_time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
+                self.notifier.notify("MOVEMENT_DETECTED")
                 return True
 
         return False
@@ -170,6 +174,13 @@ class ChangeDetector(Thread):
         elif self.mode == "photo" or self.mode == "timelapse":
             pass
         self.mode = "inactive"
+    
+    def notify_idle(self):
+        self.notifier.notify("CAPTURE_COMPLETED")
+        self.is_capturing = False
+        time.sleep(20) # wait for 20 seconds before sending idle notification
+        if(self.is_capturing==False):
+            self.notifier.notify("IDLE")
 
 # TODO: whether to use the video-port or not does not directly depend on the mode
 # In case video is requested, the video port will always be used for both resolutions
@@ -184,23 +195,27 @@ class ChangeDetector(Thread):
             if img is not None:
                 if self.detect_change_contours(img) is True:
                     self.logger.info("ChangeDetector: detected motion. Starting capture...")
+                    self.notifier.notify("MOVEMENT_DETECTED")
                     timestamp = self.get_formatted_time()
                     if self.mode == "photo":
+                        self.is_capturing = True
+                        self.notifier.notify("CAPTURING_PHOTO")
                         image = self.camera_controller.get_hires_image()
                         self.file_saver.save_image(image, timestamp)
                         self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.info("ChangeDetector: photo capture completed")
+                        threading.Thread(target=self.notify_idle).start()
                     elif self.mode == "video":
+                        self.is_capturing = True
+                        self.notifier.notify("CAPTURING_VIDEO")
                         self.file_saver.save_thumb(img, timestamp, self.mode)
                         self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
-                        self.logger.info("ChangeDetector: video capture completed")
                         if self.camera_controller.get_video_stream():
                             with self.camera_controller.get_video_stream():
                                 self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
                         else:
                             capture_duration = 10
-
                             cap = cv2.VideoCapture(0)
                             width= int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                             height= int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -215,12 +230,13 @@ class ChangeDetector(Thread):
                                     out.write(frame)
                                 else:
                                     break
-
+                            self.logger.info("ChangeDetector: video capture completed")
+                            threading.Thread(target=self.notify_idle).start()
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug("ChangeDetector: video timer reset")
                     else:
-        # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
-        #            self.logger.debug("ChangeDetector: idle")
+                    # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
+                    #            self.logger.debug("ChangeDetector: idle")
                         pass
             else:
                 self.logger.error("ChangeDetector: not receiving any images for motion detection!")
