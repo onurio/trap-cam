@@ -1,5 +1,5 @@
 {
-	"ngrok_token": "2C5SAXF8ngnvNMUIjhUtbExoAO3_75LRgYSFLQf4FrybD7Qe6",
+	"ngrok_token": "{ngrok_token}",
 	"use_ngrok": true,
 	"cv_width": 320,
 	"cv_height": 180,
