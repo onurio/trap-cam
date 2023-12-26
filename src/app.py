@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from datetime import datetime
 import time
-from src.init import create_app, create_error_app
+from .init import create_app, create_error_app
 
 app = create_app();
 
@@ -16,6 +16,7 @@ origins = [
     "http://localhost:3000",
     "http://localhost:8000",
 ]
+
 
 try:
     app.camera_controller.start()
@@ -209,3 +210,4 @@ def update_time(time_string):
             return Response('{"ERROR": "' + time_string + '"}', status=400, mimetype='application/json')
     else:
         return Response('{"NOT_MODIFIED": "' + time_string + '"}', status=304, mimetype='application/json')
+

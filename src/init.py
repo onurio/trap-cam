@@ -5,16 +5,16 @@ import os
 import sys
 from shutil import copyfile
 from logging.handlers import RotatingFileHandler
-
 from fastapi import FastAPI
 from .CameraController import CameraController
 from .ChangeDetector import ChangeDetector
 from .FileSaver import FileSaver
 from .Notifier import Notifier
 
-
 def create_app():
     app = FastAPI()
+    
+    
 
     # Setup logger
     app.logger = logging.getLogger('trapcam')
@@ -73,11 +73,13 @@ def create_app():
 
     app.logger.debug("Initialisation finished")
 
+    return app
 
+def create_ngrok_tunnel(app):
     if app.user_config["use_ngrok"] is True:
         # pyngrok should only ever be installed or initialized in a dev environment when this flag is set
         from pyngrok import ngrok
-
+        
         ngrok.set_auth_token(app.user_config["ngrok_token"])
 
         # Get the dev server port (defaults to 8000 for Uvicorn, can be overridden with `--port`
@@ -91,7 +93,8 @@ def create_app():
         # Update any base URLs or webhooks to use the public ngrok URL
         app.base_url = public_url
         app.notifier.notify("IDLE",public_url)
-    return app
+        return
+
 
 def create_error_app(e):
     # Create FastAPI app about an error occurred in the main app
@@ -102,4 +105,6 @@ def create_error_app(e):
         return f"<html><body><h1>Unable to start TrapCam.</h1>An error occurred:<pre>{e}</pre></body></html>"
 
     return app
+
+
 

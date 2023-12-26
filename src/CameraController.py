@@ -13,7 +13,8 @@ try:
 except ImportError:
     picamera = None
     picamera_exists = False
-
+    
+picamera_exists = False
 
 class CameraController(threading.Thread):
 

@@ -1,6 +1,6 @@
 {
 	"ngrok_token": "{ngrok_token}",
-	"use_ngrok": true,
+	"use_ngrok": false,
 	"cv_width": 320,
 	"cv_height": 180,
 	"img_width": 1920,
